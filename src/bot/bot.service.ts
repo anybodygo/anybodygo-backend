@@ -1,5 +1,5 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
-import { OpenaiService } from "../openai/openai.service";
+import { OpenaiService } from '../openai/openai.service';
 import patterns from '../resources/patterns';
 const TelegramBot = require('node-telegram-bot-api');
 
@@ -32,9 +32,13 @@ export class BotService implements OnModuleInit {
     this.openaiService.handleMessage(message).then((data) => {
       if (data.choices.length) {
         const answer = `Привет, ${meta.from.first_name}!\nТвоё сообщение подходит под нашу обработку!\n\nНаш ответ:\n${data.choices[0].text}`
+        const options: any = {
+          reply_to_message_id: meta.message_id,
+        }
         this.bot.sendMessage(
           meta.chat.id,
-          answer
+          answer,
+          options
         );
       }
       console.log(data);
