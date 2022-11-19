@@ -1,35 +1,45 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { OpenaiService } from "../openai/openai.service";
+import patterns from '../resources/patterns';
 const TelegramBot = require('node-telegram-bot-api');
 
 @Injectable()
 export class BotService implements OnModuleInit {
-  constructor(private openaiService: OpenaiService) {}
+  private bot: any;
+
+  constructor(private openaiService: OpenaiService) {
+    this.bot = new TelegramBot(process.env.TOKEN, { polling: true });
+  }
 
   onModuleInit() {
     this.botMessage();
   }
 
   botMessage() {
-    process.env.NTBA_FIX_319 = '1';
+    this.bot.on('message', (message) => {
+      const text = message.text.toString().toLowerCase();
+      if (this.hasPattern(text)) {
+        this.handleMessage(text, message);
+      }
+    });
+  }
 
-    const { TOKEN } = process.env;
+  hasPattern(text) {
+    return patterns.some(pattern => text.includes(pattern));
+  }
 
-    const bot = new TelegramBot(TOKEN, { polling: true });
-
-    bot.on('message', (message) => {
-      this.openaiService.handleMessage(message.text.toString()).then((data) => {
-        if (data.choices.length) {
-          const answer = `Hello, ${message.from.first_name}!\n${data.choices[0].text}`
-          bot.sendMessage(
-            message.chat.id,
-            answer
-          );
-        }
-        console.log(data);
-      }).catch((error) => {
-        console.debug(error);
-      });
+  handleMessage(message, meta) {
+    this.openaiService.handleMessage(message).then((data) => {
+      if (data.choices.length) {
+        const answer = `Привет, ${meta.from.first_name}!\nТвоё сообщение подходит под нашу обработку!\n\nНаш ответ:\n${data.choices[0].text}`
+        this.bot.sendMessage(
+          meta.chat.id,
+          answer
+        );
+      }
+      console.log(data);
+    }).catch((error) => {
+      console.debug(error);
     });
   }
 }
