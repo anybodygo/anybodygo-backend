@@ -18,10 +18,10 @@ export class Request implements IRequest {
   @Column({ 'name': 'to' })
   to: string;
 
-  @Column({ 'name': 'date_from', 'default': null, 'type': 'date' })
+  @Column({ 'name': 'date_from', 'default': null })
   dateFrom: string;
 
-  @Column({ 'name': 'date_to', 'default': null, 'type': 'date' })
+  @Column({ 'name': 'date_to', 'default': null })
   dateTo: string;
 
   @Column({ 'name': 'message', 'default': null })
