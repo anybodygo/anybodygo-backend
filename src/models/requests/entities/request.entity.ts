@@ -6,10 +6,10 @@ export class Request implements IRequest {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ 'name': 'chat_id' })
+  @Column({ 'name': 'chat_id', 'type': 'bigint' })
   chatId: number;
 
-  @Column({ 'name': 'message_id' })
+  @Column({ 'name': 'message_id', 'type': 'bigint' })
   messageId: number;
 
   @Column({ 'name': 'from' })
@@ -18,16 +18,16 @@ export class Request implements IRequest {
   @Column({ 'name': 'to' })
   to: string;
 
-  @Column({ 'name': 'date_from' })
+  @Column({ 'name': 'date_from', 'default': null, 'type': 'date' })
   dateFrom: string;
 
-  @Column({ 'name': 'date_to' })
+  @Column({ 'name': 'date_to', 'default': null, 'type': 'date' })
   dateTo: string;
 
-  @Column({ 'name': 'message' })
+  @Column({ 'name': 'message', 'default': null })
   message: string;
 
-  @Column({ 'name': 'link' })
+  @Column({ 'name': 'link', 'default': null })
   link: string;
 
   @Column({ 'default': false, 'name': 'is_rewardable' })

@@ -20,10 +20,10 @@ export class RequestsController {
 
   @Post()
   async store(@Body() body: CreateRequestDto) {
-    console.log(body);
-    // const item = await this.requestsService;
+    const item = await this.requestsService.create(body);
+    console.log(item);
     return {
-      link: `${process.env.SERVER_URL}/api/requests`
+      link: `${process.env.SERVER_URL}/api/requests?hash=${item.id}`
     };
   }
 }
