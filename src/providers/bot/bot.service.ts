@@ -58,7 +58,7 @@ export class BotService implements OnModuleInit {
           this.pushData(preparedData)
             .then(({ data }) => {
               const link: string = data.link;
-              const answer: string = `${locales.ru.replyMessage}\n${link}\n♥♥♥`;
+              const answer: string = `${locales.ru.replyMessage}\n${link}`; // ru locale as default
               const options: any = {
                 reply_to_message_id: meta.message_id,
               }

@@ -14,16 +14,16 @@ export class RequestsController {
   @Get()
   async index(@Req() request: Request) {
     const items = await this.requestsService.findAll();
-    console.log(items);
+    console.debug(items);
     return items;
   }
 
   @Post()
   async store(@Body() body: CreateRequestDto) {
     const item = await this.requestsService.create(body);
-    console.log(item);
+    console.debug(item);
     return {
-      link: `${process.env.SERVER_URL}/api/requests?hash=${item.id}`
+      link: `${process.env.FRONTEND_URL}?hash=${item.id}`
     };
   }
 }
