@@ -18,6 +18,13 @@ export class RequestsController {
     return items;
   }
 
+  @Get('/:id')
+  async show(@Req() request: Request) {
+    const item = await this.requestsService.findOne(+request.params.id);
+    console.debug(item);
+    return item;
+  }
+
   @Post()
   async store(@Body() body: CreateRequestDto) {
     const item = await this.requestsService.create(body);

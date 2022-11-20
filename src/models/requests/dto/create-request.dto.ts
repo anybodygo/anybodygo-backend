@@ -44,6 +44,11 @@ export class CreateRequestDto {
   @IsString()
   @IsNotEmpty()
   @IsOptional()
+  public link: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @IsOptional()
   public context: string;
 
   @IsBoolean()
