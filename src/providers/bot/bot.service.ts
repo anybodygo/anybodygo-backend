@@ -2,6 +2,7 @@ import { Injectable, OnModuleInit } from '@nestjs/common';
 import { OpenaiService } from '../openai/openai.service';
 import { POST_REQUESTS } from '../../config/api/routes';
 import patterns from '../../config/bot/patterns';
+import exceptions from '../../config/bot/exceptions';
 import { HttpService } from "@nestjs/axios";
 import { ParserService } from "../parser/parser.service";
 import { locales } from "../../config/bot/locales";
@@ -26,7 +27,7 @@ export class BotService implements OnModuleInit {
   botMessage() {
     this.bot.on('message', (message) => {
       const text = message.text.toString().toLowerCase();
-      if (this.hasPattern(text)) {
+      if (this.isValid(text)) {
         this.handleMessage(text, message);
       }
     });
@@ -34,6 +35,14 @@ export class BotService implements OnModuleInit {
 
   hasPattern(text) {
     return patterns.some(pattern => text.includes(pattern));
+  }
+
+  hasException(text) {
+    return exceptions.some(exception => text.includes(exception));
+  }
+
+  isValid(text) {
+    return this.hasPattern(text) && !this.hasException(text);
   }
 
   handleMessage(message, meta) {
