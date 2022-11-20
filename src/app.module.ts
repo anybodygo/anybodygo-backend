@@ -7,6 +7,7 @@ import { TypeOrmModule } from "@nestjs/typeorm";
 import { RequestsModule } from './models/requests/requests.module';
 import { DataSource } from 'typeorm';
 import entities from "./config/typeorm/entities";
+import { ParserService } from "./providers/parser/parser.service";
 
 @Module({
   imports: [
@@ -24,7 +25,7 @@ import entities from "./config/typeorm/entities";
     HttpModule
   ],
   controllers: [AppController],
-  providers: [BotService, OpenaiService],
+  providers: [BotService, OpenaiService, ParserService],
 })
 export class AppModule {
   constructor(private dataSource: DataSource) {}

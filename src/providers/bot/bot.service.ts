@@ -3,6 +3,7 @@ import { OpenaiService } from '../openai/openai.service';
 import { POST_REQUESTS } from '../../config/api/routes';
 import patterns from '../../config/bot/patterns';
 import { HttpService } from "@nestjs/axios";
+import { ParserService } from "../parser/parser.service";
 const TelegramBot = require('node-telegram-bot-api');
 
 @Injectable()
@@ -10,6 +11,7 @@ export class BotService implements OnModuleInit {
   private bot: any;
 
   constructor(
+    private readonly parserService: ParserService,
     private readonly openaiService: OpenaiService,
     private readonly httpService: HttpService
   ) {
@@ -36,7 +38,9 @@ export class BotService implements OnModuleInit {
   handleMessage(message, meta) {
     this.openaiService.handleMessage(message).then((data) => {
       if (data.choices.length) {
-        console.log(data);
+        const text: string = data.choices[0].text;
+        const parsedData = this.parserService.parseData(text);
+        console.log(parsedData);
         const options: any = {
           reply_to_message_id: meta.message_id,
         }
