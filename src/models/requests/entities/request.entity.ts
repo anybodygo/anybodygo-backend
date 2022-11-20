@@ -12,6 +12,12 @@ export class Request implements IRequest {
   @Column({ 'name': 'message_id' })
   messageId: number;
 
+  @Column({ 'name': 'from' })
+  from: string;
+
+  @Column({ 'name': 'to' })
+  to: string;
+
   @Column({ 'name': 'date_from' })
   dateFrom: string;
 

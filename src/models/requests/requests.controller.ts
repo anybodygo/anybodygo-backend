@@ -1,7 +1,8 @@
-import { Post, Controller, Req, Get } from "@nestjs/common";
+import { Post, Controller, Req, Get, Body } from "@nestjs/common";
 import { Request } from 'express';
 import { HttpService } from "@nestjs/axios";
 import { RequestsService } from './requests.service';
+import { CreateRequestDto } from "./dto/create-request.dto";
 
 @Controller('api/requests')
 export class RequestsController {
@@ -18,9 +19,11 @@ export class RequestsController {
   }
 
   @Post()
-  store(@Req() request: Request) {
+  async store(@Body() body: CreateRequestDto) {
+    console.log(body);
+    // const item = await this.requestsService;
     return {
-      link: `${process.env.SERVER_URL}/requests?from=Залупляндия&to=Hell`
+      link: `${process.env.SERVER_URL}/api/requests`
     };
   }
 }

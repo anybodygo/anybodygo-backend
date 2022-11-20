@@ -4,6 +4,7 @@ import { POST_REQUESTS } from '../../config/api/routes';
 import patterns from '../../config/bot/patterns';
 import { HttpService } from "@nestjs/axios";
 import { ParserService } from "../parser/parser.service";
+import { locales } from "../../config/bot/locales";
 const TelegramBot = require('node-telegram-bot-api');
 
 @Injectable()
@@ -39,40 +40,35 @@ export class BotService implements OnModuleInit {
     this.openaiService.handleMessage(message).then((data) => {
       if (data.choices.length) {
         const text: string = data.choices[0].text;
-        const parsedData = this.parserService.parseData(text);
-        console.log(parsedData);
-        const options: any = {
-          reply_to_message_id: meta.message_id,
+        const parsedData: any = this.parserService.parseData(text);
+        const preparedData: any = this.parserService.prepareDataToRequestObject(parsedData);
+        if (parsedData) {
+          preparedData.chatId = meta.chat.id;
+          preparedData.messageId = meta.message_id;
+          this.pushData(preparedData)
+            .then(({ data }) => {
+              const link: string = data.link;
+              const answer: string = `${locales.ua.replyMessage}\n${link}\n♥♥♥`;
+              const options: any = {
+                reply_to_message_id: meta.message_id,
+              }
+              this.bot.sendMessage(
+                meta.chat.id,
+                answer,
+                options
+              );
+            })
+            .catch((error) => {
+              console.error(error); // smth happened with POST request
+            })
         }
-        this.bot.sendMessage(
-          meta.chat.id,
-          data.choices[0].text,
-          options
-        );
-        /* @note: test data */
-
-        // this.pushData()
-        //   .then(({ data } ) => {
-        //     console.log(data)
-        //     const link: string = data.link;
-        //     const answer = `Разместил твой запрос на AnybodyGo\n[${link}]\n\nЧтобы те, кто едут, смогли его найти`;
-        //     const options: any = {
-        //       reply_to_message_id: meta.message_id,
-        //     }
-        //     this.bot.sendMessage(
-        //       meta.chat.id,
-        //       answer,
-        //       options
-        //     );
-        // })
       }
-      console.log(data);
     }).catch((error) => {
-      console.debug(error);
+      console.error(error);
     });
   }
 
-  pushData(): Promise<any> {
-    return this.httpService.axiosRef.post(POST_REQUESTS);
+  pushData(data): Promise<any> {
+    return this.httpService.axiosRef.post(POST_REQUESTS, data);
   }
 }

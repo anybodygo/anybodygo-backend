@@ -3,6 +3,7 @@ import { Injectable } from "@nestjs/common";
 @Injectable()
 export class ParserService {
   private readonly keys: string[];
+  private readonly requiredFields: string[];
 
   constructor() {
     this.keys = [
@@ -12,6 +13,10 @@ export class ParserService {
       'end_date',
       'what',
       'reward',
+    ];
+    this.requiredFields = [
+      'from',
+      'to'
     ];
   }
 
@@ -26,5 +31,33 @@ export class ParserService {
       }
     });
     return messageData.reduce((before, after) => ({...before, ...after}), {})
+  }
+
+  prepareDataToRequestObject(data) {
+    const object: any = {};
+    if (data['from'] && data['from'] !== 'unknown') {
+      object['from'] = data['from'];
+    }
+    if (data['to'] && data['to'] !== 'unknown') {
+      object['to'] = data['to'];
+    }
+    if (data['start_date'] && data['start_date'] !== 'unknown') {
+      object['dateFrom'] = data['start_date'];
+    }
+    if (data['end_date'] && data['end_date'] !== 'unknown') {
+      object['dateTo'] = data['end_date'];
+    }
+    if (data['what'] && data['what'] !== 'unknown') {
+      object['message'] = data['what'];
+    }
+    if (data['reward'] && data['reward'] !== 'unknown') {
+      object['isRewardable'] = true;
+    }
+    this.requiredFields.forEach(field => {
+      if (!Object.keys(object).includes(field)) {
+        return null; // invalid object
+      }
+    });
+    return object;
   }
 }
