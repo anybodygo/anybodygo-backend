@@ -1,4 +1,4 @@
-import { BotService } from './bot/bot.service';
+import { BotService } from './providers/bot/bot.service';
 import { Get, Controller, Res, HttpStatus } from '@nestjs/common';
 
 @Controller()

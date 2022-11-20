@@ -1,13 +1,18 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { OpenaiService } from '../openai/openai.service';
-import patterns from '../resources/patterns';
+import { POST_REQUESTS } from '../../config/api/routes';
+import patterns from '../../config/bot/patterns';
+import { HttpService } from "@nestjs/axios";
 const TelegramBot = require('node-telegram-bot-api');
 
 @Injectable()
 export class BotService implements OnModuleInit {
   private bot: any;
 
-  constructor(private openaiService: OpenaiService) {
+  constructor(
+    private readonly openaiService: OpenaiService,
+    private readonly httpService: HttpService
+  ) {
     this.bot = new TelegramBot(process.env.TOKEN, { polling: true });
   }
 
@@ -31,19 +36,28 @@ export class BotService implements OnModuleInit {
   handleMessage(message, meta) {
     this.openaiService.handleMessage(message).then((data) => {
       if (data.choices.length) {
-        const answer = `Привет, ${meta.from.first_name}!\nТвоё сообщение подходит под нашу обработку!\n\nНаш ответ:\n${data.choices[0].text}`
-        const options: any = {
-          reply_to_message_id: meta.message_id,
-        }
-        this.bot.sendMessage(
-          meta.chat.id,
-          answer,
-          options
-        );
+        this.pushData()
+          .then(({ data } ) => {
+            console.log(data)
+            const link: string = data.link;
+            const answer = `Разместил твой запрос на AnybodyGo\n[${link}]\n\nЧтобы те, кто едут, смогли его найти`;
+            const options: any = {
+              reply_to_message_id: meta.message_id,
+            }
+            this.bot.sendMessage(
+              meta.chat.id,
+              answer,
+              options
+            );
+        })
       }
       console.log(data);
     }).catch((error) => {
       console.debug(error);
     });
+  }
+
+  pushData(): Promise<any> {
+    return this.httpService.axiosRef.post(POST_REQUESTS);
   }
 }
