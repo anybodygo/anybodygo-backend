@@ -15,7 +15,7 @@ export class RequestsController {
   async index(@Req() request: Request) {
     const items = await this.requestsService.findAll();
     console.debug(items);
-    return items;
+    return items.reverse();
   }
 
   @Get('/:id')
