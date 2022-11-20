@@ -9,6 +9,12 @@ export class Request implements IRequest {
   @Column({ 'name': 'chat_id', 'type': 'bigint' })
   chatId: number;
 
+  @Column({ 'name': 'chat_name', 'type': 'text' })
+  chatName: string;
+
+  @Column({ 'name': 'chat_link', 'type': 'text' })
+  chatLink: string;
+
   @Column({ 'name': 'message_id', 'type': 'bigint' })
   messageId: number;
 

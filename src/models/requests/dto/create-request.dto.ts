@@ -5,6 +5,15 @@ export class CreateRequestDto {
   @IsNotEmpty()
   public chatId: number;
 
+  @IsString()
+  @IsNotEmpty()
+  public chatName: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @IsOptional()
+  public chatLink: string;
+
   @IsNumber()
   @IsNotEmpty()
   public messageId: number;

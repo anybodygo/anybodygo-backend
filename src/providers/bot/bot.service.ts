@@ -54,8 +54,11 @@ export class BotService implements OnModuleInit {
         const preparedData: any = this.parserService.prepareDataToRequestObject(parsedData);
         if (parsedData) {
           preparedData.chatId = meta.chat.id;
+          preparedData.chatName = meta.chat.title;
+          preparedData.chatLink = `https://t.me/${meta.chat.username}`;
           preparedData.messageId = meta.message_id;
           preparedData.context = meta.text;
+          preparedData.link = `${preparedData.chatLink}/${preparedData.messageId}`;
           this.pushData(preparedData)
             .then(({ data }) => {
               const link: string = data.link;
