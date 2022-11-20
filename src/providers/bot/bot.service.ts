@@ -46,6 +46,7 @@ export class BotService implements OnModuleInit {
   }
 
   handleMessage(message, meta) {
+    console.log(meta);
     this.openaiService.handleMessage(message).then((data) => {
       if (data.choices.length) {
         const text: string = data.choices[0].text;
