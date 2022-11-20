@@ -11,9 +11,10 @@ export class RequestsController {
   ) {}
 
   @Get()
-  index(@Req() request: Request) {
-    const items = this.requestsService.findAll();
+  async index(@Req() request: Request) {
+    const items = await this.requestsService.findAll();
     console.log(items);
+    return items;
   }
 
   @Post()

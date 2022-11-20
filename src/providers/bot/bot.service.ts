@@ -36,20 +36,31 @@ export class BotService implements OnModuleInit {
   handleMessage(message, meta) {
     this.openaiService.handleMessage(message).then((data) => {
       if (data.choices.length) {
-        this.pushData()
-          .then(({ data } ) => {
-            console.log(data)
-            const link: string = data.link;
-            const answer = `Разместил твой запрос на AnybodyGo\n[${link}]\n\nЧтобы те, кто едут, смогли его найти`;
-            const options: any = {
-              reply_to_message_id: meta.message_id,
-            }
-            this.bot.sendMessage(
-              meta.chat.id,
-              answer,
-              options
-            );
-        })
+        console.log(data);
+        const options: any = {
+          reply_to_message_id: meta.message_id,
+        }
+        this.bot.sendMessage(
+          meta.chat.id,
+          data.choices[0].text,
+          options
+        );
+        /* @note: test data */
+        
+        // this.pushData()
+        //   .then(({ data } ) => {
+        //     console.log(data)
+        //     const link: string = data.link;
+        //     const answer = `Разместил твой запрос на AnybodyGo\n[${link}]\n\nЧтобы те, кто едут, смогли его найти`;
+        //     const options: any = {
+        //       reply_to_message_id: meta.message_id,
+        //     }
+        //     this.bot.sendMessage(
+        //       meta.chat.id,
+        //       answer,
+        //       options
+        //     );
+        // })
       }
       console.log(data);
     }).catch((error) => {

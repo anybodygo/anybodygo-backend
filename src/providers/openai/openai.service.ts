@@ -1,5 +1,6 @@
 import { GpTs } from 'gpts';
 import { Injectable } from "@nestjs/common";
+import { TRAILS_BEFORE, TRAILS_AFTER } from '../../config/openai/trails';
 
 @Injectable()
 export class OpenaiService {
@@ -13,7 +14,11 @@ export class OpenaiService {
     this.brain = new GpTs(process.env.OPENAI_APIKEY);
     return this.brain.completion({
       engineId: this.engineId,
-      prompt: message,
+      prompt: `${TRAILS_BEFORE}${message}${TRAILS_AFTER}`,
+      max_tokens: 70,
+      temperature: 0,
+      n: 1,
+      stop: '\n###'
     });
   }
 }
