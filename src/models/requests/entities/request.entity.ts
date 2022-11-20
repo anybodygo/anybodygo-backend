@@ -27,6 +27,9 @@ export class Request implements IRequest {
   @Column({ 'name': 'message', 'default': null })
   message: string;
 
+  @Column({ 'name': 'context', 'default': null })
+  context: string;
+
   @Column({ 'name': 'link', 'default': null })
   link: string;
 

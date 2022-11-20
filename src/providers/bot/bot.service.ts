@@ -45,10 +45,11 @@ export class BotService implements OnModuleInit {
         if (parsedData) {
           preparedData.chatId = meta.chat.id;
           preparedData.messageId = meta.message_id;
+          preparedData.context = meta.text;
           this.pushData(preparedData)
             .then(({ data }) => {
               const link: string = data.link;
-              const answer: string = `${locales.ua.replyMessage}\n${link}\n♥♥♥`;
+              const answer: string = `${locales.ru.replyMessage}\n${link}\n♥♥♥`;
               const options: any = {
                 reply_to_message_id: meta.message_id,
               }

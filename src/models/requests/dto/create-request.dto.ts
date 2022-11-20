@@ -32,6 +32,11 @@ export class CreateRequestDto {
   @IsOptional()
   public message: string;
 
+  @IsString()
+  @IsNotEmpty()
+  @IsOptional()
+  public context: string;
+
   @IsBoolean()
   @IsNotEmpty()
   @IsOptional()

@@ -8,5 +8,6 @@ export interface IRequest {
   dateTo: string;
   message: string;
   link: string;
+  context: string;
   isRewardable: boolean;
 }
