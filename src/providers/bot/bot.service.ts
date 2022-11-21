@@ -49,7 +49,7 @@ export class BotService implements OnModuleInit {
   handleMessage(message, meta) {
     console.log(meta);
     const date: string = dayjs().format('DD.MM.YYYY HH:mm');
-    const prefix = `${meta.chat.title}\n${date}\n\n`
+    const prefix: string = `${meta.chat.title}\n${date}\n\n`
     this.openaiService.handleMessage(message, prefix).then((data) => {
       if (data.choices.length) {
         const text: string = data.choices[0].text;
@@ -65,9 +65,16 @@ export class BotService implements OnModuleInit {
           this.pushData(preparedData)
             .then(({ data }) => {
               const link: string = data.link;
-              const answer: string = `${locales.ru.replyMessage}\n${link}`; // ru locale as default
+              const answer: string = `${locales.ru.replyMessage}\n`; // ru locale as default
               const options: any = {
                 reply_to_message_id: meta.message_id,
+                reply_markup: {
+                  inline_keyboard: [[{
+                    text: locales.ru.replyActionText,
+                    switch_inline_query: locales.ru.replySwitch,
+                    url: link
+                  }]]
+                }
               }
               this.bot.sendMessage(
                 meta.chat.id,
