@@ -7,6 +7,7 @@ import { HttpService } from "@nestjs/axios";
 import { ParserService } from "../parser/parser.service";
 import { locales } from "../../config/bot/locales";
 const TelegramBot = require('node-telegram-bot-api');
+import * as dayjs from 'dayjs';
 
 @Injectable()
 export class BotService implements OnModuleInit {
@@ -47,7 +48,9 @@ export class BotService implements OnModuleInit {
 
   handleMessage(message, meta) {
     console.log(meta);
-    this.openaiService.handleMessage(message).then((data) => {
+    const date: string = dayjs().format('DD.MM.YYYY HH:mm');
+    const prefix = `${meta.chat.title}\n${date}\n\n`
+    this.openaiService.handleMessage(message, prefix).then((data) => {
       if (data.choices.length) {
         const text: string = data.choices[0].text;
         const parsedData: any = this.parserService.parseData(text);

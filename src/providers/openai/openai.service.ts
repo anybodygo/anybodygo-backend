@@ -10,11 +10,11 @@ export class OpenaiService {
   }
   private brain: GpTs;
 
-  async handleMessage(message) {
+  async handleMessage(message, prefix = '') {
     this.brain = new GpTs(process.env.OPENAI_APIKEY);
     return this.brain.completion({
       engineId: this.engineId,
-      prompt: `${TRAILS_BEFORE}${message}${TRAILS_AFTER}`,
+      prompt: `${TRAILS_BEFORE}${prefix}${message}${TRAILS_AFTER}`,
       max_tokens: 70,
       temperature: 0,
       n: 1,
