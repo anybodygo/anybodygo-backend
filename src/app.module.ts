@@ -2,12 +2,12 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { BotService } from './providers/bot/bot.service';
 import { OpenaiService } from './providers/openai/openai.service';
-import { HttpModule } from "@nestjs/axios";
-import { TypeOrmModule } from "@nestjs/typeorm";
-import { RequestsModule } from './models/requests/requests.module';
+import { HttpModule } from '@nestjs/axios';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import entities from "./config/typeorm/entities";
-import { ParserService } from "./providers/parser/parser.service";
+import entities from './config/typeorm/entities';
+import { ParserService } from './providers/parser/parser.service';
+import { RequestsModule } from './requests/requests.module';
 
 @Module({
   imports: [

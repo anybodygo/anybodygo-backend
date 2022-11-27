@@ -1,4 +1,4 @@
-import { Request } from '../../models/requests/entities/request.entity';
+import { Request } from '../../requests/entities/request.entity';
 
 const entities = [Request,];
 

@@ -1,4 +1,7 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable } from '@nestjs/common';
+const customParseFormat = require('dayjs/plugin/customParseFormat');
+import * as dayjs from 'dayjs';
+dayjs.extend(customParseFormat);
 
 @Injectable()
 export class ParserService {
@@ -16,7 +19,9 @@ export class ParserService {
     ];
     this.requiredFields = [
       'from',
-      'to'
+      'to',
+      'start_date',
+      'end_date',
     ];
   }
 
@@ -36,22 +41,26 @@ export class ParserService {
   prepareDataToRequestObject(data) {
     const object: any = {};
     if (data['from'] && data['from'] !== 'unknown') {
-      object['from'] = data['from'];
+      object['from'] = data['from'].toString().split(',');
     }
     if (data['to'] && data['to'] !== 'unknown') {
-      object['to'] = data['to'];
+      object['to'] = data['to'].toString().split(',');
     }
     if (data['start_date'] && data['start_date'] !== 'unknown') {
-      object['dateFrom'] = data['start_date'];
+      console.debug(data['start_date']);
+      object['dateFrom'] = dayjs(data['start_date'], 'DD-MM-YYYY').toDate();
+      console.debug(object['dateFrom']);
     }
     if (data['end_date'] && data['end_date'] !== 'unknown') {
-      object['dateTo'] = data['end_date'];
+      console.debug(data['end_date']);
+      object['dateTo'] = dayjs(data['end_date'], 'DD-MM-YYYY').toDate();
+      console.debug(object['dateTo']);
     }
     if (data['what'] && data['what'] !== 'unknown') {
-      object['message'] = data['what'];
+      object['context'] = data['what'];
     }
     if (data['reward'] && data['reward'] !== 'unknown') {
-      object['isRewardable'] = true;
+      object['hasReward'] = data['reward'] === 'yes';
     }
     this.requiredFields.forEach(field => {
       if (!Object.keys(object).includes(field)) {
