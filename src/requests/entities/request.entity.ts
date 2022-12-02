@@ -2,16 +2,21 @@ import {
     Column,
     CreateDateColumn,
     DeleteDateColumn,
-    Entity,
+    Entity, Generated, OneToMany,
     PrimaryGeneratedColumn,
     UpdateDateColumn
 } from 'typeorm';
+import {RequestDirection} from '../../request-directions/entities/request-direction.entity';
 
 
 @Entity({ name: 'requests' })
 export class Request {
     @PrimaryGeneratedColumn()
     id: number;
+
+    @Column({ 'name': 'guid' })
+    @Generated('uuid')
+    guid: string;
 
     @Column({ 'name': 'chat_id', 'type': 'bigint' })
     chatId: number;
@@ -63,4 +68,7 @@ export class Request {
 
     @DeleteDateColumn({ name: 'deleted_at' })
     deletedAt: Date;
+
+    @OneToMany(() => RequestDirection, (direction) => direction.request)
+    directions: RequestDirection[]
 }
