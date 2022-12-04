@@ -4,6 +4,7 @@ import {InjectRepository} from "@nestjs/typeorm";
 import {Request} from './entities/request.entity';
 import {Repository} from "typeorm";
 
+const LIMIT: number = 10;
 @Injectable()
 export class RequestsService {
   constructor(
@@ -23,13 +24,48 @@ export class RequestsService {
     });
   }
 
-  findAll() {
-    return this.requestsRepository.find({
-      order: {
-        dateTo: 'ASC'
-      },
-      withDeleted: false,
-    });
+  findAll(conditions: any = null) {
+    const query = this.requestsRepository.createQueryBuilder('request');
+    if (conditions) {
+      query.innerJoin('request.directions', 'direction');
+      if (conditions.fromCountryId) {
+        query.where(
+            'direction.fromCountryId = :fromCountryId',
+            { fromCountryId: +conditions.fromCountryId });
+      }
+      if (conditions.toCountryId) {
+        query.where(
+            'direction.toCountryId = :toCountryId',
+            { toCountryId: +conditions.toCountryId });
+      }
+      if (conditions.fromCityId) {
+        query.where(
+            'direction.fromCityId = :fromCityId',
+            { fromCityId: +conditions.fromCityId });
+      }
+      if (conditions.toCityId) {
+        query.where(
+            'direction.toCityId = :toCityId',
+            { toCityId: +conditions.toCityId });
+      }
+      if (conditions.dateFrom) {
+        query.where(
+            'request.dateFrom <= :dateFrom',
+            { dateFrom: conditions.dateFrom });
+      }
+      if (conditions.dateTo) {
+        query.where(
+            'request.dateTo >= :dateTo',
+            { dateTo: conditions.dateTo });
+      }
+      if (conditions.hasReward) {
+        const hasReward = +conditions.hasReward;
+        query.where(
+            'request.hasReward = :hasReward',
+            { hasReward });
+      }
+    }
+    return query.limit(LIMIT).getMany();
   }
 
   findOne(guid: string) {

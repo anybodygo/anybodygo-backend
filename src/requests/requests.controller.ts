@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param } from '@nestjs/common';
+import {Controller, Get, Post, Body, Param, Query} from '@nestjs/common';
 import { RequestsService } from './requests.service';
 import { CreateRequestDto } from './dto/create-request.dto';
 import {RequestDirectionsService} from "../request-directions/request-directions.service";
@@ -21,8 +21,8 @@ export class RequestsController {
   }
 
   @Get()
-  findAll() {
-    return this.requestsService.findAll();
+  findAll(@Query() query) {
+    return this.requestsService.findAll(query);
   }
 
   @Get(':guid')
