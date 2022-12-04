@@ -9,7 +9,7 @@ export class Country {
     @Column({ name: 'name' })
     name: string;
 
-    @Column({ name: 'flag' })
+    @Column({ name: 'flag', default: null })
     flag: string;
 
     @OneToMany(() => City, (city) => city.country)

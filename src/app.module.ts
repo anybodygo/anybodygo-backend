@@ -4,14 +4,12 @@ import { BotService } from './providers/bot/bot.service';
 import { OpenaiService } from './providers/openai/openai.service';
 import { HttpModule } from '@nestjs/axios';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
 import entities from './config/typeorm/entities';
 import { ParserService } from './providers/parser/parser.service';
 import { RequestsModule } from './requests/requests.module';
 import { RequestDirectionsModule } from './request-directions/request-directions.module';
 import {LocationService} from "./providers/location/location.service";
-import { CitiesModule } from './cities/cities.module';
-import { CountriesModule } from './countries/countries.module';
+import {LocationsModule} from "./locations/locations.module";
 
 @Module({
   imports: [
@@ -28,13 +26,15 @@ import { CountriesModule } from './countries/countries.module';
     RequestsModule,
     HttpModule,
     RequestDirectionsModule,
-    CitiesModule,
-    CountriesModule
+    LocationsModule
   ],
   controllers: [AppController],
-  providers: [BotService, OpenaiService, ParserService, LocationService],
+  providers: [
+    BotService,
+    OpenaiService,
+    ParserService,
+    LocationService
+  ],
 })
-export class AppModule {
-  constructor(private dataSource: DataSource) {}
-}
+export class AppModule {}
 
