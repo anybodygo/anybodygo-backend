@@ -1,10 +1,11 @@
 import {
     Column, Entity,
-    Generated,
+    Generated, JoinColumn,
     ManyToOne,
     PrimaryGeneratedColumn
 } from 'typeorm';
 import {Request} from '../../requests/entities/request.entity';
+import {Country} from "../../countries/entities/country.entity";
 
 @Entity({ name: 'request_directions' })
 export class RequestDirection {
@@ -28,5 +29,6 @@ export class RequestDirection {
     toCityId: number;
 
     @ManyToOne(() => Request, (request) => request.directions)
+    @JoinColumn({ name: "request_id" })
     request: Request;
 }

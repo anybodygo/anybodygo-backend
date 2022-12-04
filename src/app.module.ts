@@ -10,6 +10,8 @@ import { ParserService } from './providers/parser/parser.service';
 import { RequestsModule } from './requests/requests.module';
 import { RequestDirectionsModule } from './request-directions/request-directions.module';
 import {LocationService} from "./providers/location/location.service";
+import { CitiesModule } from './cities/cities.module';
+import { CountriesModule } from './countries/countries.module';
 
 @Module({
   imports: [
@@ -25,7 +27,9 @@ import {LocationService} from "./providers/location/location.service";
     }),
     RequestsModule,
     HttpModule,
-    RequestDirectionsModule
+    RequestDirectionsModule,
+    CitiesModule,
+    CountriesModule
   ],
   controllers: [AppController],
   providers: [BotService, OpenaiService, ParserService, LocationService],
