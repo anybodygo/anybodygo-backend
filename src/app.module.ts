@@ -7,8 +7,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import entities from './config/typeorm/entities';
 import { ParserService } from './providers/parser/parser.service';
 import { RequestsModule } from './requests/requests.module';
-import { RequestDirectionsModule } from './request-directions/request-directions.module';
-import {LocationService} from "./providers/location/location.service";
 import {LocationsModule} from "./locations/locations.module";
 
 @Module({
@@ -25,15 +23,13 @@ import {LocationsModule} from "./locations/locations.module";
     }),
     RequestsModule,
     HttpModule,
-    RequestDirectionsModule,
     LocationsModule
   ],
   controllers: [AppController],
   providers: [
     BotService,
     OpenaiService,
-    ParserService,
-    LocationService
+    ParserService
   ],
 })
 export class AppModule {}

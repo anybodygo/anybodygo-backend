@@ -6,6 +6,7 @@ import {Country} from "../countries/entities/country.entity";
 import {City} from "../cities/entities/city.entity";
 import {LocationParserService} from "../providers/location-parser/location-parser.service";
 import {LocationsController} from "./locations.controller";
+import {LocationService} from "../providers/location/location.service";
 
 @Module({
     imports: [
@@ -15,7 +16,8 @@ import {LocationsController} from "./locations.controller";
     providers: [
         CountriesService,
         CitiesService,
-        LocationParserService
+        LocationParserService,
+        LocationService
     ]
 })
 export class LocationsModule {}

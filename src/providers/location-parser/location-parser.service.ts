@@ -32,7 +32,6 @@ export class LocationParserService {
                     id: +countryObject.country_id,
                     name: countryObject.name,
                 };
-                console.log(newCountry);
                 this.countriesService.create(newCountry).then((entity) => {
                     console.debug(entity);
                 }).catch((error) => {
@@ -56,19 +55,25 @@ export class LocationParserService {
                 }).catch((error) => {
                     console.error(error);
                 });
-            } else {
-                const country = await this.countriesService.findOne(+cityObject.country_id);
-                const updatedCity: any = {
-                    id: +cityObject.city_id,
-                    country: country,
-                    name: cityObject.name,
-                };
-                this.citiesService.update(updatedCity.id, updatedCity).then((entity) => {
-                    console.debug(entity);
-                }).catch((error) => {
-                    console.error(error);
+            }
+        });
+        this.citiesService.findOneByName('Бали').then((cityEntity) => {
+            if (!cityEntity) {
+                const country = this.countriesService.findOneByName('Индонезия').then((countryEntity) => {
+                    if (countryEntity) {
+                        const newCity: any = {
+                            id: 20000000, // unique id
+                            country: countryEntity,
+                            name: 'Бали',
+                        };
+                        this.citiesService.create(newCity).then((entity) => {
+                            console.debug(entity);
+                        }).catch((error) => {
+                            console.error(error);
+                        });
+                    }
                 });
             }
-        })
+        });
     }
 }

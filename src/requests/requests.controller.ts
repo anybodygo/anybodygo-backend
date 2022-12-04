@@ -1,15 +1,28 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
 import { RequestsService } from './requests.service';
 import { CreateRequestDto } from './dto/create-request.dto';
+import {RequestDirectionsService} from "../request-directions/request-directions.service";
 // import { UpdateRequestDto } from './dto/update-request.dto';
 
 @Controller('requests')
 export class RequestsController {
-  constructor(private readonly requestsService: RequestsService) {}
+  constructor(
+      private readonly requestsService: RequestsService,
+      private readonly requestDirectionsService: RequestDirectionsService
+  ) {}
 
   @Post()
-  create(@Body() createRequestDto: CreateRequestDto) {
-    return this.requestsService.create(createRequestDto);
+  async create(@Body() createRequestDto: CreateRequestDto) {
+    let directions = [];
+    if (createRequestDto.directions) {
+      directions = createRequestDto.directions;
+      delete createRequestDto.directions;
+    }
+    const newRequest = await this.requestsService.create(createRequestDto);
+    directions.forEach((directionData) => {
+      const newDirection = { ...directionData, request: newRequest };
+      this.requestDirectionsService.create(newDirection);
+    })
   }
 
   @Get()
@@ -21,15 +34,4 @@ export class RequestsController {
   findOne(@Param('id') id: string) {
     return this.requestsService.findOne(+id);
   }
-
-  // @note: blocked as for now
-  // @Patch(':id')
-  // update(@Param('id') id: string, @Body() updateRequestDto: UpdateRequestDto) {
-  //   return this.requestsService.update(+id, updateRequestDto);
-  // }
-  //
-  // @Delete(':id')
-  // remove(@Param('id') id: string) {
-  //   return this.requestsService.remove(+id);
-  // }
 }

@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
 const customParseFormat = require('dayjs/plugin/customParseFormat');
 import * as dayjs from 'dayjs';
-import {LocationService} from "../location/location.service";
 import {CreateRequestDirectionDto} from "../../request-directions/dto/create-request-direction.dto";
+import {GET_LOCATION} from "../../config/api/routes";
+import {HttpService} from "@nestjs/axios";
 dayjs.extend(customParseFormat);
 
 @Injectable()
@@ -10,7 +11,9 @@ export class ParserService {
   private readonly keys: string[];
   private readonly requiredFields: string[];
 
-  constructor(private readonly locationService: LocationService) {
+  constructor(
+      private readonly httpService: HttpService
+  ) {
     this.keys = [
       'from',
       'to',
@@ -78,24 +81,41 @@ export class ParserService {
   parseDirections(from: string[], to: string[]) {
     const fromData: any = [];
     const toData: any = [];
-    from.forEach((item) => {
-      fromData.push(this.locationService.getLocation('from_', item));
+    from.forEach(async (item) => {
+      const value = await this.fetchLocation('from_', item);
+      if (value) {
+        fromData.push(value);
+      }
     })
-    to.forEach((item) => {
-      toData.push(this.locationService.getLocation('to_', item));
+    to.forEach(async (item) => {
+      const value = await this.fetchLocation('to_', item);
+      if (value) {
+        toData.push(value);
+      }
     })
-    const directions: CreateRequestDirectionDto[] = [];
+    const directions: any = [];
     fromData.forEach((fromLocation) => {
       toData.forEach((toLocation) => {
-        const item: CreateRequestDirectionDto = {
-          fromCountryId: fromLocation.from_country_id,
-          fromCityId: fromLocation.from_city_id,
-          toCountryId: toLocation.to_country_id,
-          toCityId: toLocation.to_city_id,
+        const item: any = {};
+        if (fromLocation.from_country_id) {
+          item['fromCountryId'] = fromLocation.from_country_id;
+        }
+        if (fromLocation.from_city_id) {
+          item['fromCityId'] = fromLocation.from_city_id;
+        }
+        if (toLocation.to_country_id) {
+          item['toCountryId'] = toLocation.to_country_id;
+        }
+        if (toLocation.to_city_id) {
+          item['toCityId'] = toLocation.to_city_id;
         }
         directions.push(item);
       })
     })
     return directions;
+  }
+
+  fetchLocation(prefix, name): Promise<any> {
+    return this.httpService.axiosRef.get(GET_LOCATION(prefix, name));
   }
 }

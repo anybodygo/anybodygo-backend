@@ -20,6 +20,10 @@ export class CountriesService {
     return this.countriesRepository.findOneBy({ id });
   }
 
+  findOneByName(name: string) {
+    return this.countriesRepository.findOneBy({ name });
+  }
+
   async update(id: number, updateCountryDto: UpdateCountryDto) {
     const country = await this.findOne(id);
     return this.countriesRepository.save({ ...country, ...updateCountryDto });

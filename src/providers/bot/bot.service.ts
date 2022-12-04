@@ -58,7 +58,6 @@ export class BotService implements OnModuleInit {
         const parsedData: any = this.parserService.parseData(text);
         const preparedData: any = this.parserService.prepareDataToRequestObject(parsedData);
         if (parsedData) {
-          delete preparedData.directions; // test removing
           preparedData.chatId = meta.chat.id;
           preparedData.messageId = meta.message_id;
           preparedData.userId = meta.from.id; // @todo: Save all the details in users table

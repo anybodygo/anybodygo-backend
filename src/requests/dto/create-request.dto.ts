@@ -67,4 +67,9 @@ export class CreateRequestDto {
     @IsOptional()
     @IsNotEmpty()
     public hasReward: boolean;
+
+    @IsArray()
+    @IsOptional()
+    @IsNotEmpty()
+    public directions: any;
 }

@@ -20,6 +20,14 @@ export class CitiesService {
     return this.citiesRepository.findOneBy({ id });
   }
 
+  findOneByName(name: string) {
+    return this.citiesRepository
+        .createQueryBuilder('city')
+        .innerJoinAndSelect('city.country', 'country')
+        .where('city.name = :name', { name })
+        .getOne();
+  }
+
   async update(id: number, updateCityDto: UpdateCityDto) {
     const city = await this.findOne(id);
     return this.citiesRepository.save({ ...city, ...updateCityDto });

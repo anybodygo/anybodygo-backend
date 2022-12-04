@@ -1,4 +1,5 @@
 import {IsNotEmpty, IsNumber, IsOptional} from "class-validator";
+import {Request} from "../../requests/entities/request.entity";
 
 export class CreateRequestDirectionDto {
     @IsNumber()
@@ -18,4 +19,8 @@ export class CreateRequestDirectionDto {
     @IsOptional()
     @IsNotEmpty()
     toCityId: number;
+
+    @IsOptional()
+    @IsNotEmpty()
+    request: Request;
 }
