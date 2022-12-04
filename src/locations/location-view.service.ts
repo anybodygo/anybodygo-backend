@@ -16,8 +16,8 @@ export class LocationViewService {
     {
         return this.locationViewRepository
             .createQueryBuilder("location")
-            .where("LOWER(location.name) LIKE :name", { name: `${query}%` })
-            .orWhere("LOWER(location.parent) LIKE :parent", { parent: `${query}%` })
+            .where("LOWER(location.name) LIKE :name", { name: `${query.toLowerCase()}%` })
+            .orWhere("LOWER(location.parent) LIKE :parent", { parent: `${query.toLowerCase()}%` })
             .limit(LIMIT)
             .getMany();
     }
