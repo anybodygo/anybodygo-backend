@@ -4,7 +4,6 @@ import {InjectRepository} from "@nestjs/typeorm";
 import {Request} from './entities/request.entity';
 import {Repository} from "typeorm";
 
-const LIMIT: number = 10;
 @Injectable()
 export class RequestsService {
   constructor(
@@ -65,7 +64,7 @@ export class RequestsService {
             { hasReward });
       }
     }
-    return query.limit(LIMIT).getMany();
+    return query.orderBy('request.dateTo').getMany();
   }
 
   findOne(guid: string) {
