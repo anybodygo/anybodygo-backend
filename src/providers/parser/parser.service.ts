@@ -43,7 +43,7 @@ export class ParserService {
     return messageData.reduce((before, after) => ({...before, ...after}), {})
   }
 
-  prepareDataToRequestObject(data) {
+  async prepareDataToRequestObject(data) {
     const object: any = {};
     if (data['from'] && data['from'] !== 'unknown') {
       object['from'] = data['from'].toString().split(',');
@@ -52,7 +52,7 @@ export class ParserService {
       object['to'] = data['to'].toString().split(',');
     }
     if (object['from'] && object['to']) {
-      object['directions'] = this.parseDirections(object['from'], object['to']);
+      object['directions'] = await this.parseDirections(object['from'], object['to']);
     }
     if (data['start_date'] && data['start_date'] !== 'unknown') {
       console.debug(data['start_date']);
@@ -78,21 +78,21 @@ export class ParserService {
     return object;
   }
 
-  parseDirections(from: string[], to: string[]) {
+  async parseDirections(from: string[], to: string[]) {
     const fromData: any = [];
     const toData: any = [];
-    from.forEach(async (item) => {
-      const value = await this.fetchLocation('from_', item);
-      if (value) {
-        fromData.push(value);
+    for (let i = 0; i < from.length; i++) {
+      const { data } = await this.fetchLocation('from', from[i]);
+      if (data) {
+        fromData.push(data);
       }
-    })
-    to.forEach(async (item) => {
-      const value = await this.fetchLocation('to_', item);
-      if (value) {
-        toData.push(value);
+    }
+    for (let i = 0; i < to.length; i++) {
+      const { data } = await this.fetchLocation('to', to[i]);
+      if (data) {
+        toData.push(data);
       }
-    })
+    }
     const directions: any = [];
     fromData.forEach((fromLocation) => {
       toData.forEach((toLocation) => {

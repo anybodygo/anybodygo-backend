@@ -56,39 +56,40 @@ export class BotService implements OnModuleInit {
       if (data.choices.length) {
         const text: string = data.choices[0].text;
         const parsedData: any = this.parserService.parseData(text);
-        const preparedData: any = this.parserService.prepareDataToRequestObject(parsedData);
-        if (parsedData) {
-          preparedData.chatId = meta.chat.id;
-          preparedData.messageId = meta.message_id;
-          preparedData.userId = meta.from.id; // @todo: Save all the details in users table
-          preparedData.chatName = meta.chat.title;
-          preparedData.chatLink = `${this.tgPrefix}${meta.chat.username}`;
-          preparedData.message = meta.text;
-          preparedData.messageLink = `${preparedData.chatLink}/${preparedData.messageId}`;
-          this.pushData(preparedData)
-            .then(({ data }) => {
-              const link: string = data.link;
-              const answer: string = `${locales.ru.replyMessage}\n`; // ru locale as default
-              const options: any = {
-                reply_to_message_id: meta.message_id,
-                reply_markup: {
-                  inline_keyboard: [[{
-                    text: locales.ru.replyActionText,
-                    switch_inline_query: locales.ru.replySwitch,
-                    url: link
-                  }]]
-                }
-              }
-              this.bot.sendMessage(
-                meta.chat.id,
-                answer,
-                options
-              );
-            })
-            .catch((error) => {
-              console.error(error); // something happened with POST request
-            })
-        }
+        this.parserService.prepareDataToRequestObject(parsedData).then((preparedData) => {
+          if (parsedData) {
+            preparedData.chatId = meta.chat.id;
+            preparedData.messageId = meta.message_id;
+            preparedData.userId = meta.from.id; // @todo: Save all the details in users table
+            preparedData.chatName = meta.chat.title;
+            preparedData.chatLink = `${this.tgPrefix}${meta.chat.username}`;
+            preparedData.message = meta.text;
+            preparedData.messageLink = `${preparedData.chatLink}/${preparedData.messageId}`;
+            this.pushData(preparedData)
+                .then(({ data }) => {
+                  const link: string = data.link;
+                  const answer: string = `${locales.ru.replyMessage}\n`; // ru locale as default
+                  const options: any = {
+                    reply_to_message_id: meta.message_id,
+                    reply_markup: {
+                      inline_keyboard: [[{
+                        text: locales.ru.replyActionText,
+                        switch_inline_query: locales.ru.replySwitch,
+                        url: link
+                      }]]
+                    }
+                  }
+                  this.bot.sendMessage(
+                      meta.chat.id,
+                      answer,
+                      options
+                  );
+                })
+                .catch((error) => {
+                  console.error(error); // something happened with POST request
+                })
+          }
+        });
       }
     }).catch((error) => {
       console.error(error);

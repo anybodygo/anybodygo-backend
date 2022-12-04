@@ -7,6 +7,7 @@ import {
     IsOptional,
     IsString
 } from 'class-validator';
+import {Type} from "class-transformer";
 
 export class CreateRequestDto {
     @IsNumber()
@@ -41,10 +42,12 @@ export class CreateRequestDto {
     @IsNotEmpty()
     public to: string[];
 
+    @Type(() => Date)
     @IsDate()
     @IsNotEmpty()
     public dateFrom: Date;
 
+    @Type(() => Date)
     @IsDate()
     @IsNotEmpty()
     public dateTo: Date;
