@@ -50,7 +50,7 @@ export class RequestsService {
       }
       if (conditions.dateFrom) {
         query.andWhere(
-            'request.dateFrom <= :dateFrom',
+            'request.dateFrom <= :dateFrom AND request.dateTo >= :dateFrom',
             { dateFrom: conditions.dateFrom });
       }
       if (conditions.dateTo) {
