@@ -29,38 +29,38 @@ export class RequestsService {
     if (conditions) {
       query.innerJoin('request.directions', 'direction');
       if (conditions.fromCountryId) {
-        query.where(
+        query.andWhere(
             'direction.fromCountryId = :fromCountryId',
             { fromCountryId: +conditions.fromCountryId });
       }
       if (conditions.toCountryId) {
-        query.where(
+        query.andWhere(
             'direction.toCountryId = :toCountryId',
             { toCountryId: +conditions.toCountryId });
       }
       if (conditions.fromCityId) {
-        query.where(
+        query.andWhere(
             'direction.fromCityId = :fromCityId',
             { fromCityId: +conditions.fromCityId });
       }
       if (conditions.toCityId) {
-        query.where(
+        query.andWhere(
             'direction.toCityId = :toCityId',
             { toCityId: +conditions.toCityId });
       }
       if (conditions.dateFrom) {
-        query.where(
+        query.andWhere(
             'request.dateFrom <= :dateFrom',
             { dateFrom: conditions.dateFrom });
       }
       if (conditions.dateTo) {
-        query.where(
+        query.andWhere(
             'request.dateTo >= :dateTo',
             { dateTo: conditions.dateTo });
       }
       if (conditions.hasReward) {
         const hasReward = +conditions.hasReward;
-        query.where(
+        query.andWhere(
             'request.hasReward = :hasReward',
             { hasReward });
       }
