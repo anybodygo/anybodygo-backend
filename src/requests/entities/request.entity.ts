@@ -2,7 +2,7 @@ import {
     Column,
     CreateDateColumn,
     DeleteDateColumn,
-    Entity, Generated, OneToMany,
+    Entity, Generated, Index, OneToMany,
     PrimaryGeneratedColumn,
     UpdateDateColumn
 } from 'typeorm';
@@ -10,6 +10,7 @@ import {RequestDirection} from '../../request-directions/entities/request-direct
 
 
 @Entity({ name: 'requests' })
+@Index(['chatId', 'messageId', 'userId'], { unique: true })
 export class Request {
     @PrimaryGeneratedColumn()
     id: number;

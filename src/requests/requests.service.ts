@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import {BadRequestException, Injectable} from '@nestjs/common';
 import { CreateRequestDto } from './dto/create-request.dto';
 import { UpdateRequestDto } from './dto/update-request.dto';
 import {InjectRepository} from "@nestjs/typeorm";
@@ -14,7 +14,14 @@ export class RequestsService {
 
   create(createRequestDto: CreateRequestDto) {
     const newRequest = this.requestsRepository.create(createRequestDto);
-    return this.requestsRepository.save(newRequest);
+    return this.requestsRepository.save(newRequest).catch((error) => {
+      if (error) {
+        throw new BadRequestException(
+            'Request with this [messageId, chatId, userId] already exists.',
+        );
+      }
+      return error;
+    });
   }
 
   findAll() {
