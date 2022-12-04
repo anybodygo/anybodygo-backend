@@ -2,12 +2,12 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { BotService } from './providers/bot/bot.service';
 import { OpenaiService } from './providers/openai/openai.service';
-import { HttpModule } from "@nestjs/axios";
-import { TypeOrmModule } from "@nestjs/typeorm";
-import { RequestsModule } from './models/requests/requests.module';
-import { DataSource } from 'typeorm';
-import entities from "./config/typeorm/entities";
-import { ParserService } from "./providers/parser/parser.service";
+import { HttpModule } from '@nestjs/axios';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import entities from './config/typeorm/entities';
+import { ParserService } from './providers/parser/parser.service';
+import { RequestsModule } from './requests/requests.module';
+import {LocationsModule} from "./locations/locations.module";
 
 @Module({
   imports: [
@@ -22,12 +22,15 @@ import { ParserService } from "./providers/parser/parser.service";
       synchronize: true,
     }),
     RequestsModule,
-    HttpModule
+    HttpModule,
+    LocationsModule
   ],
   controllers: [AppController],
-  providers: [BotService, OpenaiService, ParserService],
+  providers: [
+    BotService,
+    OpenaiService,
+    ParserService
+  ],
 })
-export class AppModule {
-  constructor(private dataSource: DataSource) {}
-}
+export class AppModule {}
 
