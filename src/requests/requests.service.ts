@@ -1,6 +1,5 @@
 import {BadRequestException, Injectable} from '@nestjs/common';
 import { CreateRequestDto } from './dto/create-request.dto';
-import { UpdateRequestDto } from './dto/update-request.dto';
 import {InjectRepository} from "@nestjs/typeorm";
 import {Request} from './entities/request.entity';
 import {Repository} from "typeorm";
@@ -33,17 +32,7 @@ export class RequestsService {
     });
   }
 
-  findOne(id: number) {
-    return this.requestsRepository.findOneBy({ id });
-  }
-
-  async update(id: number, updateRequestDto: UpdateRequestDto) {
-    const request = await this.findOne(id);
-    return this.requestsRepository.save({ ...request, ...updateRequestDto });
-  }
-
-  async remove(id: number) {
-    const request = await this.findOne(id);
-    return this.requestsRepository.remove(request);
+  findOne(guid: string) {
+    return this.requestsRepository.findOneBy({ guid });
   }
 }

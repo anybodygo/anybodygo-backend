@@ -8,6 +8,7 @@ import { ParserService } from '../parser/parser.service';
 import { locales } from '../../config/bot/locales';
 const TelegramBot = require('node-telegram-bot-api');
 import * as dayjs from 'dayjs';
+require('dotenv').config();
 
 @Injectable()
 export class BotService implements OnModuleInit {
@@ -66,8 +67,8 @@ export class BotService implements OnModuleInit {
             preparedData.message = meta.text;
             preparedData.messageLink = `${preparedData.chatLink}/${preparedData.messageId}`;
             this.pushData(preparedData)
-                .then(({ data }) => {
-                  const link: string = data.link;
+                .then(({data}) => {
+                  const link: string = `${process.env.FRONTEND_URL}?hash=${data.guid}`;
                   const answer: string = `${locales.ru.replyMessage}\n`; // ru locale as default
                   const options: any = {
                     reply_to_message_id: meta.message_id,

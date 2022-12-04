@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param } from '@nestjs/common';
 import { RequestsService } from './requests.service';
 import { CreateRequestDto } from './dto/create-request.dto';
 import {RequestDirectionsService} from "../request-directions/request-directions.service";
@@ -17,6 +17,7 @@ export class RequestsController {
       const newDirection = { ...directionData, request: newRequest };
       this.requestDirectionsService.create(newDirection);
     })
+    return newRequest;
   }
 
   @Get()
@@ -24,8 +25,8 @@ export class RequestsController {
     return this.requestsService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.requestsService.findOne(+id);
+  @Get(':guid')
+  findOne(@Param('guid') guid: string) {
+    return this.requestsService.findOne(guid);
   }
 }
