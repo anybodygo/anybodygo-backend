@@ -26,7 +26,7 @@ export class RequestsService {
   findAll(conditions: any = null) {
     const query = this.requestsRepository.createQueryBuilder('request');
     if (conditions) {
-      query.innerJoin('request.directions', 'direction');
+      query.leftJoin('request.directions', 'direction');
       if (conditions.fromCountryId) {
         query.andWhere(
             'direction.fromCountryId = :fromCountryId',
