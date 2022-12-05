@@ -63,6 +63,12 @@ export class RequestsService {
             'request.hasReward = :hasReward',
             { hasReward });
       }
+      if (conditions.userId) {
+        const userId = +conditions.userId;
+        query.andWhere(
+            'request.userId = :userId',
+            { userId });
+      }
     }
     return query.orderBy('request.dateTo').getMany();
   }

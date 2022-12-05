@@ -1,6 +1,6 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { OpenaiService } from '../openai/openai.service';
-import { POST_REQUESTS } from '../../config/api/routes';
+import {GET_REQUESTS, POST_REQUESTS} from '../../config/api/routes';
 import patterns from '../../config/bot/patterns';
 import exceptions from '../../config/bot/exceptions';
 import { HttpService } from '@nestjs/axios';
@@ -9,6 +9,11 @@ import { locales } from '../../config/bot/locales';
 const TelegramBot = require('node-telegram-bot-api');
 import * as dayjs from 'dayjs';
 require('dotenv').config();
+
+const BOT_CHAT_TYPE: string = 'private';
+const START_COMMAND: string = '/start';
+const EDIT_COMMAND: string = 'edit';
+const REMOVE_COMMAND: string = 'remove';
 
 @Injectable()
 export class BotService implements OnModuleInit {
@@ -26,15 +31,110 @@ export class BotService implements OnModuleInit {
 
   onModuleInit() {
     this.botMessage();
+    this.botCallback();
+  }
+
+  botCallback() {
+    this.bot.on('callback_query', function onCallbackQuery(callbackQuery) {
+      const context = callbackQuery.data;
+      if (context.includes(REMOVE_COMMAND)) {
+        this.sendMessage(
+            callbackQuery.message.chat.id,
+            locales.ru.noRemoveAvailable
+        );
+      } else if (context.includes(EDIT_COMMAND)) {
+        this.sendMessage(
+            callbackQuery.message.chat.id,
+            locales.ru.noEditAvailable
+        );
+      }
+    });
   }
 
   botMessage() {
     this.bot.on('message', (message) => {
-      const text = message.text.toString().toLowerCase();
-      if (this.isValid(text)) {
-        this.handleMessage(text, message);
+      if (message.chat.type === BOT_CHAT_TYPE) {
+        if (message.text.toString() === START_COMMAND) {
+          this.validateUser(message.from.id, message.chat.id);
+        }
+      } else {
+        const text = message.text.toString().toLowerCase();
+        if (this.isValid(text)) {
+          this.handleMessage(text, message);
+        }
       }
     });
+  }
+
+  validateUser(userId: number, chatId: number) {
+    this.getUserRequests(userId)
+        .then(({data}) => {
+          const requests = data;
+          if (!requests.length) {
+            this.bot.sendMessage(
+                chatId,
+                locales.ru.notFoundRequests
+            );
+          } else {
+            this.bot.sendMessage(
+                chatId,
+                locales.ru.foundRequests
+            );
+          }
+          requests.forEach((request) => {
+            let message = ``;
+            if (request.from && request.from.length) {
+              const from = request.from.join(", ");
+              message += `Откуда: ${from}\n`;
+            }
+            if (request.to && request.to.length) {
+              const to = request.to.join(", ");
+              message += `Куда: ${to}\n`;
+            }
+            if (request.dateFrom) {
+              const date = dayjs(request.dateFrom).format('YYYY-MM-DD');
+              message += `С какого: ${date}\n`;
+            }
+            if (request.dateTo) {
+              const date = dayjs(request.dateTo).format('YYYY-MM-DD');
+              message += `До какого: ${date}\n`;
+            }
+            if (request.context) {
+              message += `Что привезти: ${request.context}\n`;
+            }
+            if (request.hasReward) {
+              let reward: string = '';
+              switch (request.hasReward) {
+                case true:
+                  reward = 'да';
+                  break;
+                case false:
+                  reward = 'нет';
+                  break;
+                default:
+                  reward = 'неизвестно';
+              }
+              message += `Вознаграждение: ${reward}\n`;
+            }
+            message += `\n`;
+            if (request.messageLink) {
+              message += `Сообщение:\n${request.messageLink}`;
+            }
+            const options: any = {
+              reply_markup: {
+                inline_keyboard: [
+                  [{text: 'Удалить', callback_data: `remove ${request.guid}` }],
+                  [{text: 'Редактировать', callback_data: `edit ${request.guid}` }]
+                ]
+              }
+            }
+            this.bot.sendMessage(
+                chatId,
+                message,
+                options
+            );
+          })
+        })
   }
 
   hasPattern(text) {
@@ -99,5 +199,10 @@ export class BotService implements OnModuleInit {
 
   pushData(data): Promise<any> {
     return this.httpService.axiosRef.post(POST_REQUESTS, data);
+  }
+
+  getUserRequests(userId): Promise<any> {
+    const query = GET_REQUESTS + `?userId=${userId}`;
+    return this.httpService.axiosRef.get(query);
   }
 }
