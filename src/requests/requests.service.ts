@@ -24,6 +24,9 @@ export class RequestsService {
   }
 
   findAll(conditions: any = null) {
+    const take = 10; // each page contains 10 items
+    const page = conditions.page || 1;
+    const skip = (page - 1) * take;
     const query = this.requestsRepository.createQueryBuilder('request');
     if (conditions) {
       query.leftJoin('request.directions', 'direction');
@@ -70,7 +73,7 @@ export class RequestsService {
             { userId });
       }
     }
-    return query.orderBy('request.dateTo').getMany();
+    return query.take(take).skip(skip).orderBy('request.dateTo').getManyAndCount();
   }
 
   findOne(guid: string) {

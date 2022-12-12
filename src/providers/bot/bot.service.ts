@@ -69,7 +69,7 @@ export class BotService implements OnModuleInit {
   validateUser(userId: number, chatId: number) {
     this.getUserRequests(userId)
         .then(({data}) => {
-          const requests = data;
+          const requests = data.data;
           if (!requests.length) {
             this.bot.sendMessage(
                 chatId,

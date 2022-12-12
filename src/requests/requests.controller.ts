@@ -21,8 +21,9 @@ export class RequestsController {
   }
 
   @Get()
-  findAll(@Query() query) {
-    return this.requestsService.findAll(query);
+  async findAll(@Query() query) {
+    const [data, total] = await this.requestsService.findAll(query);
+    return { data, total }
   }
 
   @Get(':guid')
