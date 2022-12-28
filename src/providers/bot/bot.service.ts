@@ -14,6 +14,7 @@ const BOT_CHAT_TYPE: string = 'private';
 const START_COMMAND: string = '/start';
 const EDIT_COMMAND: string = 'edit';
 const REMOVE_COMMAND: string = 'remove';
+const CREATE_REQUEST_COMMAND: string = 'create-request';
 
 @Injectable()
 export class BotService implements OnModuleInit {
@@ -36,32 +37,52 @@ export class BotService implements OnModuleInit {
 
   botCallback() {
     this.bot.on('callback_query', function onCallbackQuery(callbackQuery) {
-      const context = callbackQuery.data;
-      if (context.includes(REMOVE_COMMAND)) {
-        this.sendMessage(
-            callbackQuery.message.chat.id,
-            locales.ru.noRemoveAvailable
-        );
-      } else if (context.includes(EDIT_COMMAND)) {
-        this.sendMessage(
-            callbackQuery.message.chat.id,
-            locales.ru.noEditAvailable
-        );
+      try {
+        const context = callbackQuery.data;
+        if (context === CREATE_REQUEST_COMMAND) {
+          this.sendMessage(
+              callbackQuery.message.chat.id,
+              locales.ru.infoAboutCreation
+          ).then(() => {
+            this.sendMessage(
+                callbackQuery.message.chat.id,
+                locales.ru.infoAboutBot
+            );
+          });
+        } else if (context.includes(REMOVE_COMMAND)) {
+          // @todo: add flow
+          this.sendMessage(
+              callbackQuery.message.chat.id,
+              locales.ru.noRemoveAvailable
+          );
+        } else if (context.includes(EDIT_COMMAND)) {
+          // @todo: add flow
+          this.sendMessage(
+              callbackQuery.message.chat.id,
+              locales.ru.noEditAvailable
+          );
+        }
+      } catch (exception) {
+        console.error(exception);
       }
     });
   }
 
   botMessage() {
     this.bot.on('message', (message) => {
-      if (message.chat.type === BOT_CHAT_TYPE) {
-        if (message.text.toString() === START_COMMAND) {
-          this.validateUser(message.from.id, message.chat.id);
+      try {
+        if (message.chat.type === BOT_CHAT_TYPE) {
+          if (message.text.toString() === START_COMMAND) {
+            this.validateUser(message.from.id, message.chat.id);
+          }
+        } else {
+          const text = message.text.toString().toLowerCase();
+          if (this.isValid(text)) {
+            this.handleMessage(text, message);
+          }
         }
-      } else {
-        const text = message.text.toString().toLowerCase();
-        if (this.isValid(text)) {
-          this.handleMessage(text, message);
-        }
+      } catch (exception) {
+        console.error(exception);
       }
     });
   }
@@ -70,71 +91,91 @@ export class BotService implements OnModuleInit {
     this.getUserRequests(userId)
         .then(({data}) => {
           const requests = data.data;
-          if (!requests.length) {
-            this.bot.sendMessage(
-                chatId,
-                locales.ru.notFoundRequests
-            );
-          } else {
-            this.bot.sendMessage(
-                chatId,
-                locales.ru.foundRequests
-            );
-          }
-          requests.forEach((request) => {
-            let message = ``;
-            if (request.from && request.from.length) {
-              const from = request.from.join(", ");
-              message += `Откуда: ${from}\n`;
-            }
-            if (request.to && request.to.length) {
-              const to = request.to.join(", ");
-              message += `Куда: ${to}\n`;
-            }
-            if (request.dateFrom) {
-              const date = dayjs(request.dateFrom).format('YYYY-MM-DD');
-              message += `С какого: ${date}\n`;
-            }
-            if (request.dateTo) {
-              const date = dayjs(request.dateTo).format('YYYY-MM-DD');
-              message += `До какого: ${date}\n`;
-            }
-            if (request.context) {
-              message += `Что привезти: ${request.context}\n`;
-            }
-            if (request.hasReward) {
-              let reward: string = '';
-              switch (request.hasReward) {
-                case true:
-                  reward = 'да';
-                  break;
-                case false:
-                  reward = 'нет';
-                  break;
-                default:
-                  reward = 'неизвестно';
-              }
-              message += `Вознаграждение: ${reward}\n`;
-            }
-            message += `\n`;
-            if (request.messageLink) {
-              message += `Сообщение:\n${request.messageLink}`;
-            }
-            const options: any = {
-              reply_markup: {
-                inline_keyboard: [
-                  [{text: 'Удалить', callback_data: `remove ${request.guid}` }],
-                  [{text: 'Редактировать', callback_data: `edit ${request.guid}` }]
-                ]
-              }
-            }
-            this.bot.sendMessage(
-                chatId,
-                message,
-                options
-            );
-          })
+          this.handleRequests(chatId, requests);
         })
+  }
+
+  handleRequests(chatId: number, requests) {
+    if (!requests.length) {
+      const options: any = {
+        reply_markup: {
+          inline_keyboard: [
+            [{text: locales.ru.createRequest, callback_data: `create-request` }],
+          ]
+        }
+      }
+      this.bot.sendMessage(
+          chatId,
+          locales.ru.notFoundRequests,
+          options
+      );
+    } else {
+      this.bot.sendMessage(
+          chatId,
+          locales.ru.foundRequests
+      );
+      requests.forEach((request) => {
+        const message = this.getRequestMessage(request);
+        const options: any = {
+          reply_markup: {
+            inline_keyboard: [
+              [
+                  {text: locales.ru.remove, callback_data: `remove ${request.guid}` },
+                  {text: locales.ru.edit, callback_data: `edit ${request.guid}` }
+              ]
+            ]
+          }
+        }
+        this.bot.sendMessage(
+            chatId,
+            message,
+            options
+        );
+      })
+    }
+  }
+
+  getRequestMessage(request): string
+  {
+    let message = ``;
+    if (request.from && request.from.length) {
+      const from = request.from.join(", ");
+      message += `${locales.ru.from}: ${from}\n`;
+    }
+    if (request.to && request.to.length) {
+      const to = request.to.join(", ");
+      message += `${locales.ru.to}: ${to}\n`;
+    }
+    if (request.dateFrom) {
+      const date = dayjs(request.dateFrom).format('YYYY-MM-DD');
+      message += `${locales.ru.fromDate}: ${date}\n`;
+    }
+    if (request.dateTo) {
+      const date = dayjs(request.dateTo).format('YYYY-MM-DD');
+      message += `${locales.ru.toDate}: ${date}\n`;
+    }
+    if (request.context) {
+      message += `${locales.ru.whatBring}: ${request.context}\n`;
+    }
+    if (request.hasReward) {
+      let reward: string = '';
+      switch (request.hasReward) {
+        case true:
+          reward = locales.ru.hasReward;
+          break;
+        case false:
+          reward = locales.ru.noReward;
+          break;
+        default:
+          reward = locales.ru.unknownReward;
+      }
+      message += `${locales.ru.reward}: ${reward}\n`;
+    }
+    message += `\n`;
+    if (request.messageLink) {
+      message += `${locales.ru.message}:\n${request.messageLink}`;
+    }
+    return message;
   }
 
   hasPattern(text) {
