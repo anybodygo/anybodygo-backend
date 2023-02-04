@@ -27,7 +27,7 @@ export default class ReadChat {
                 this.handleMessage(text, message);
             }
         } catch (exception) {
-            console.error(exception);
+            console.error(exception.message);
         }
     }
 
@@ -43,7 +43,7 @@ export default class ReadChat {
                     if (parsedData) {
                         preparedData.chatId = meta.chat.id;
                         preparedData.messageId = meta.message_id;
-                        preparedData.userId = meta.from.id; // @todo: Save all the details in users table
+                        preparedData.userId = meta.from.id; // @todo: Save all the details in chats table
                         preparedData.chatName = meta.chat.title;
                         preparedData.chatLink = `${this.tgPrefix}${meta.chat.username}`;
                         preparedData.message = meta.text;
