@@ -1,3 +1,4 @@
+import * as dayjs from "dayjs";
 import {locales} from "../../../../config/bot/locales";
 
 const EDIT_FROM_COMMAND: string = 'edit-from';
@@ -8,6 +9,21 @@ const EDIT_WHAT_COMMAND: string = 'edit-what';
 
 export const getChat = async (_this, chatId) => {
     return await _this.chatsRepository.findOneBy({ chatId });
+}
+
+export const getCity = async (_this, name) => {
+    return await _this.citiesRepository
+        .createQueryBuilder('city')
+        .innerJoinAndSelect('city.country', 'country')
+        .where('LOWER(city.name) = :name', { name: name.toLowerCase() })
+        .getOne();
+}
+
+export const getCountry = async (_this, name) => {
+    return await _this.countriesRepository
+        .createQueryBuilder('country')
+        .where('LOWER(country.name) = :name', { name: name.toLowerCase() })
+        .getOne();
 }
 
 export const createChat = async (_this, chatId) => {
@@ -35,41 +51,69 @@ export const handleAction = async (_this, chatId, context, message, options = {}
     }
 }
 
-export const getActionDetails = async (_this, chatId, value) => {
-    let chat: any = await getChat(_this, chatId);
-    if (!chat || (chat && !chat.action)) {
-        return null;
+export const getLocation = async (_this, value) => {
+    const city = await getCity(_this, value);
+    if (city) {
+        return { city };
     } else {
-        const action: string = chat.action;
-        const separatorIndex: number = action.indexOf(' ');
-        const command = action.substring(0, separatorIndex);
-        const guid: string = action.substring(separatorIndex + 1);
-        let output: any = { guid };
-        switch (command) {
-            case EDIT_FROM_COMMAND:
-                output.column = 'from';
-                // 
-                output.value = value;
-                break;
-            case EDIT_TO_COMMAND:
-                output.column = 'to';
-                //
-                output.value = value;
-                break;
-            case EDIT_DATE_FROM_COMMAND:
-                output.column = 'dateFrom';
-                //
-                output.value = value;
-                break;
-            case EDIT_DATE_TO_COMMAND:
-                output.column = 'dateTo';
-                //
-                output.value = value;
-                break;
-            case EDIT_WHAT_COMMAND:
-                output.column = 'context';
-                output.value = value;
-                break;
+        const country = await getCountry(_this, value);
+        if (country) {
+            return { country };
+        } else {
+            return null; // wrong value
         }
     }
+}
+
+export const getActionDetails = async (_this, chat, value) => {
+    const action: string = chat.action;
+    const separatorIndex: number = action.indexOf(' ');
+    const command = action.substring(0, separatorIndex);
+    const guid: string = action.substring(separatorIndex + 1);
+    let output: any = { guid };
+    let location: any = null;
+    let isValidDate: boolean = false;
+    switch (command) {
+        case EDIT_FROM_COMMAND:
+            output.column = 'from';
+            location = await getLocation(_this, value);
+            console.debug(location);
+            if (!location) {
+                return { message: locales.ru.wrongLocationMessage.replace('{value}', value), exception: true };
+            }
+            output.value = location;
+            break;
+        case EDIT_TO_COMMAND:
+            output.column = 'to';
+            location = await getLocation(_this, value);
+            console.debug(location);
+            if (!location) {
+                return { message: locales.ru.wrongLocationMessage.replace('{value}', value), exception: true };
+            }
+            output.value = location;
+            break;
+        case EDIT_DATE_FROM_COMMAND:
+            output.column = 'dateFrom';
+            isValidDate = dayjs(value, 'DD.MM.YYYY', true).isValid();
+            if (!isValidDate) {
+                return { message: locales.ru.wrongDateMessage, exception: true };
+            }
+            output.value = value;
+            break;
+        case EDIT_DATE_TO_COMMAND:
+            output.column = 'dateTo';
+            isValidDate = dayjs(value, 'DD.MM.YYYY', true).isValid();
+            if (!isValidDate) {
+                return { message: locales.ru.wrongDateMessage, exception: true };
+            }
+            output.value = value;
+            break;
+        case EDIT_WHAT_COMMAND:
+            output.column = 'context';
+            output.value = value;
+            break;
+        default:
+            return undefined;
+    }
+    return output;
 }

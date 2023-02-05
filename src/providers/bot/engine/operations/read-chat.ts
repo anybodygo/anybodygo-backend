@@ -28,6 +28,7 @@ export default class ReadChat {
             }
         } catch (exception) {
             console.error(exception.message);
+            console.error('Context: ', message);
         }
     }
 

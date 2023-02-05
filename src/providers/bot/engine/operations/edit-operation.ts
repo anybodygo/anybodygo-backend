@@ -48,7 +48,6 @@ export default class EditOperation {
                 await handleAction(this, chatId, context, locales.ru.editRewardMessage, options);
                 break;
             case EDIT_WHAT_COMMAND:
-                // add save current action
                 await handleAction(this, chatId, context, locales.ru.editWhatMessage);
                 break;
             case EDIT_REWARD_YES_COMMAND:

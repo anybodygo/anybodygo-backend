@@ -37,7 +37,8 @@ export default class CallbackHandler {
                 await this.editHandler.handle(context, chatId);
             }
         } catch (exception) {
-            console.error(exception);
+            console.error(exception.message);
+            console.error('Context: ', query);
         }
     }
 }

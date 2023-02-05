@@ -3,6 +3,11 @@ export const locales: any = {
     replyMessage: 'We have just posted your request on AnybodyGO'
   },
   ru: {
+    updateRequestMessage: 'Отредактировали твой запрос. Все ли правильно?',
+    confirmEdit: '"{value}", верно?',
+    wrongLocationMessage: 'Не нашли "{value}" в списке локаций. Попробуй написать еще раз.\n' +
+        'Либо обратитесь к @belonel, чтобы добавить новую локацию.',
+    wrongDateMessage: 'Неправильный формат даты, напиши еще раз.',
     editOptionsMessage: 'Выбери какую часть запроса отредактировать.',
     editFromMessage: 'Напиши страну или город откуда доставить.',
     editToMessage: 'Напиши страну или город куда доставить.',
