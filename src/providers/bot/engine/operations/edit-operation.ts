@@ -20,15 +20,17 @@ const EDIT_FROM_NO_COMMAND: string = 'edit-from:no';
 const EDIT_TO_YES_COMMAND: string = 'edit-to:yes';
 const EDIT_TO_NO_COMMAND: string = 'edit-to:no';
 
-import {handleAction} from "./chat-extend";
+import {getCity, getCountry, handleAction} from "./chat-extend";
 import MessageHandler from "../message-handler";
 import {ParserService} from "../../../parser/parser.service";
 import {OpenaiService} from "../../../openai/openai.service";
 import {HttpService} from "@nestjs/axios";
+import {RequestDirection} from "../../../../request-directions/entities/request-direction.entity";
 
 export default class EditOperation {
     private chatsRepository: Repository<Chat>;
     private requestsRepository: Repository<Request>;
+    private requestDirectionsRepository: Repository<RequestDirection>;
     private citiesRepository: Repository<City>;
     private countriesRepository: Repository<Country>;
     private messageHandler: MessageHandler;
@@ -40,6 +42,7 @@ export default class EditOperation {
     ) {
         this.chatsRepository = AppDataSource.getRepository(Chat);
         this.requestsRepository = AppDataSource.getRepository(Request);
+        this.requestDirectionsRepository = AppDataSource.getRepository(RequestDirection);
         this.citiesRepository = AppDataSource.getRepository(City);
         this.countriesRepository = AppDataSource.getRepository(Country);
         this.messageHandler = new MessageHandler(parserService, openaiService, httpService, bot);
@@ -120,12 +123,7 @@ export default class EditOperation {
                         request.from = [output.from.name];
                         const updatedRequest: any = await this.requestsRepository.save({ ...request });
                         if (updatedRequest) {
-                            this.bot.sendMessage(
-                                chatId,
-                                locales.ru.updateRequestMessage
-                            ).then(() => {
-                                this.messageHandler.sendConfirmation(chatId, request);
-                            });
+                            await this.handleRequestWithDirections(chatId, updatedRequest);
                         }
                     }
                 }
@@ -150,17 +148,97 @@ export default class EditOperation {
                         request.to = [output.to.name];
                         const updatedRequest: any = await this.requestsRepository.save({ ...request });
                         if (updatedRequest) {
-                            this.bot.sendMessage(
-                                chatId,
-                                locales.ru.updateRequestMessage
-                            ).then(() => {
-                                this.messageHandler.sendConfirmation(chatId, request);
-                            });
+                            await this.handleRequestWithDirections(chatId, updatedRequest);
                         }
                     }
                 }
                 break;
         }
+    }
+
+    private async handleRequestWithDirections(chatId, updatedRequest) {
+        const directions: any = await this.parseDirections(updatedRequest.from, updatedRequest.to);
+        if (directions) {
+            const emptyDirectionsList: any = await this.requestDirectionsRepository
+                .delete({request: updatedRequest});
+            if (emptyDirectionsList && emptyDirectionsList.affected === 0) {
+                directions.forEach((directionData) => {
+                    const newDirectionAttributes = { ...directionData, request: updatedRequest };
+                    const newDirection = this.requestDirectionsRepository.create(newDirectionAttributes);
+                    return this.requestDirectionsRepository.save(newDirection);
+                });
+                this.bot.sendMessage(
+                    chatId,
+                    locales.ru.updateRequestMessage
+                ).then(() => {
+                    this.messageHandler.sendConfirmation(chatId, updatedRequest);
+                });
+            }
+        } else {
+            this.bot.sendMessage(
+                chatId,
+                locales.ru.updateRequestMessage
+            ).then(() => {
+                this.messageHandler.sendConfirmation(chatId, updatedRequest);
+            });
+        }
+    }
+
+    private async parseDirections(from: string[], to: string[]) {
+        const fromData: any = [];
+        const toData: any = [];
+        for (let i = 0; i < from.length; i++) {
+            const data: any = await this.getLocation('from', from[i]);
+            if (data) {
+                fromData.push(data);
+            }
+        }
+        for (let i = 0; i < to.length; i++) {
+            const data: any = await this.getLocation('to', to[i]);
+            if (data) {
+                toData.push(data);
+            }
+        }
+        const directions: any = [];
+        fromData.forEach((fromLocation) => {
+            toData.forEach((toLocation) => {
+                const item: any = {};
+                if (fromLocation.from_country_id) {
+                    item['fromCountryId'] = fromLocation.from_country_id;
+                }
+                if (fromLocation.from_city_id) {
+                    item['fromCityId'] = fromLocation.from_city_id;
+                }
+                if (toLocation.to_country_id) {
+                    item['toCountryId'] = toLocation.to_country_id;
+                }
+                if (toLocation.to_city_id) {
+                    item['toCityId'] = toLocation.to_city_id;
+                }
+                directions.push(item);
+            })
+        })
+        return directions;
+    }
+
+    private async getLocation(prefix: string, value: string)
+    {
+        const cityKey: string = `${prefix}_city_id`;
+        const countryKey: string = `${prefix}_country_id`;
+        const object: any = {};
+        const country = await getCountry(this, value);
+        if (country) {
+            object[countryKey] = country.id;
+        } else {
+            const city = await getCity(this, value);
+            if (city) {
+                object[countryKey] = city.country.id;
+                object[cityKey] = city.id;
+            } else {
+                console.error(`There are no cities and countries with name: ${value}`);
+            }
+        }
+        return Object.keys(object).length ? object : null;
     }
 
     private getRewardOptionsKeyboard(guid) {
