@@ -2,6 +2,8 @@ import {locales} from "../../../../config/bot/locales";
 import {AppDataSource} from "../../../../app-data-source"
 import {Chat} from "../../../../chats/entities/chat.entity";
 import {Request} from "../../../../requests/entities/request.entity";
+import {City} from "../../../../cities/entities/city.entity";
+import {Country} from "../../../../countries/entities/country.entity";
 import {Repository} from "typeorm";
 
 const EDIT_COMMAND: string = 'edit';
@@ -23,9 +25,13 @@ import {handleAction} from "./chat-extend";
 export default class EditOperation {
     private chatsRepository: Repository<Chat>;
     private requestsRepository: Repository<Request>;
+    private citiesRepository: Repository<City>;
+    private countriesRepository: Repository<Country>;
     constructor(private readonly bot) {
         this.chatsRepository = AppDataSource.getRepository(Chat);
         this.requestsRepository = AppDataSource.getRepository(Request);
+        this.citiesRepository = AppDataSource.getRepository(City);
+        this.countriesRepository = AppDataSource.getRepository(Country);
     }
 
     async handle(context, chatId) {
@@ -68,33 +74,57 @@ export default class EditOperation {
                 break;
             case EDIT_REWARD_YES_COMMAND:
             case EDIT_REWARD_NO_COMMAND:
-                // add save current action
-                // query.session.currentAction = command;
-                // handle this value
                 const hasReward: boolean = command === EDIT_REWARD_YES_COMMAND;
-                console.debug(hasReward);
+                request = await this.requestsRepository.findOneBy({ guid: output.guid });
+                if (request) {
+                    request.hasReward = hasReward;
+                    await this.requestsRepository.save({ ...request });
+                }
+                // get request
                 break;
             case EDIT_FROM_YES_COMMAND:
                 output.guid = guid.substring(0, guid.indexOf(':'));
                 if (guid.includes('city')) {
-                    output.fromCityId = +guid.substring(guid.indexOf(':city:') + 6);
+                    output.from = await this.citiesRepository
+                        .findOneBy({
+                            id: +guid.substring(guid.indexOf(':city:') + 6)
+                        });
                 } else {
-                    output.fromCountryId = +guid.substring(guid.indexOf(':country:') + 9);
+                    output.from = await this.countriesRepository
+                        .findOneBy({
+                            id: +guid.substring(guid.indexOf(':country:') + 9)
+                        });
                 }
-                console.debug(output);
-                request = await this.requestsRepository.findOneBy({ guid: output.guid });
-                console.debug(request);
+                if (output.from) {
+                    request = await this.requestsRepository.findOneBy({ guid: output.guid });
+                    if (request) {
+                        request.from = [output.from.name];
+                        await this.requestsRepository.save({ ...request });
+                    }
+                }
+                // get request
                 break;
             case EDIT_TO_YES_COMMAND:
                 output.guid = guid.substring(0, guid.indexOf(':'));
                 if (guid.includes('city')) {
-                    output.toCityId = +guid.substring(guid.indexOf(':city:') + 6);
+                    output.to = await this.citiesRepository
+                        .findOneBy({
+                            id: +guid.substring(guid.indexOf(':city:') + 6)
+                        });
                 } else {
-                    output.toCountryId = +guid.substring(guid.indexOf(':country:') + 9);
+                    output.to = await this.countriesRepository
+                        .findOneBy({
+                            id: +guid.substring(guid.indexOf(':country:') + 9)
+                        });
                 }
-                console.debug(output);
-                request = await this.requestsRepository.findOneBy({ guid: output.guid });
-                console.debug(request);
+                if (output.to) {
+                    request = await this.requestsRepository.findOneBy({ guid: output.guid });
+                    if (request) {
+                        request.to = [output.to.name];
+                        await this.requestsRepository.save({ ...request });
+                    }
+                }
+                // get request
                 break;
         }
     }

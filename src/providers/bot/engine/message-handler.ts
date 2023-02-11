@@ -102,7 +102,10 @@ export default class MessageHandler {
                             );
                         } else {
                             const request: any = await this.requestsRepository.findOneBy({ guid: actionDetails.guid });
-                            console.debug(request);
+                            if (request) {
+                                request[actionDetails.column] = actionDetails.value;
+                                await this.requestsRepository.save({ ...request });
+                            }
                         }
                     }
                 }

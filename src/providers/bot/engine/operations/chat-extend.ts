@@ -1,9 +1,7 @@
 import * as dayjs from "dayjs";
 import {locales} from "../../../../config/bot/locales";
 
-const EDIT_FROM_YES_COMMAND: string = 'edit-from:yes';
 const EDIT_FROM_COMMAND: string = 'edit-from';
-const EDIT_TO_YES_COMMAND: string = 'edit-to:yes';
 const EDIT_TO_COMMAND: string = 'edit-to';
 const EDIT_DATE_FROM_COMMAND: string = 'edit-date-from';
 const EDIT_DATE_TO_COMMAND: string = 'edit-date-to';
@@ -76,24 +74,6 @@ export const getActionDetails = async (_this, chat, value) => {
     let location: any = null;
     let isValidDate: boolean = false;
     switch (command) {
-        case EDIT_FROM_YES_COMMAND:
-            output.column = 'from';
-            output.guid = guid.substring(0, guid.indexOf(':'));
-            if (guid.includes('city')) {
-                output.fromCityId = guid.substring(guid.indexOf(':city:') + 6);
-            } else {
-                output.fromCountryId = guid.substring(guid.indexOf(':country:') + 9);
-            }
-            break;
-        case EDIT_TO_YES_COMMAND:
-            output.column = 'to';
-            output.guid = guid.substring(0, guid.indexOf(':'));
-            if (guid.includes('city')) {
-                output.toCityId = guid.substring(guid.indexOf(':city:') + 6);
-            } else {
-                output.toCountryId = guid.substring(guid.indexOf(':country:') + 9);
-            }
-            break;
         case EDIT_FROM_COMMAND:
             output.column = 'from';
             location = await getLocation(_this, value);
@@ -118,7 +98,7 @@ export const getActionDetails = async (_this, chat, value) => {
             if (!isValidDate) {
                 return { message: locales.ru.wrongDateMessage, exception: true };
             }
-            output.value = value;
+            output.value = dayjs(value, 'DD.MM.YYYY', true).toDate();
             break;
         case EDIT_DATE_TO_COMMAND:
             output.column = 'dateTo';
@@ -126,7 +106,7 @@ export const getActionDetails = async (_this, chat, value) => {
             if (!isValidDate) {
                 return { message: locales.ru.wrongDateMessage, exception: true };
             }
-            output.value = value;
+            output.value = dayjs(value, 'DD.MM.YYYY', true).toDate();
             break;
         case EDIT_WHAT_COMMAND:
             output.column = 'context';
