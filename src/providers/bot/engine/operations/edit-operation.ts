@@ -21,17 +21,28 @@ const EDIT_TO_YES_COMMAND: string = 'edit-to:yes';
 const EDIT_TO_NO_COMMAND: string = 'edit-to:no';
 
 import {handleAction} from "./chat-extend";
+import MessageHandler from "../message-handler";
+import {ParserService} from "../../../parser/parser.service";
+import {OpenaiService} from "../../../openai/openai.service";
+import {HttpService} from "@nestjs/axios";
 
 export default class EditOperation {
     private chatsRepository: Repository<Chat>;
     private requestsRepository: Repository<Request>;
     private citiesRepository: Repository<City>;
     private countriesRepository: Repository<Country>;
-    constructor(private readonly bot) {
+    private messageHandler: MessageHandler;
+    constructor(
+        private readonly bot,
+        parserService: ParserService,
+        openaiService: OpenaiService,
+        httpService: HttpService
+    ) {
         this.chatsRepository = AppDataSource.getRepository(Chat);
         this.requestsRepository = AppDataSource.getRepository(Request);
         this.citiesRepository = AppDataSource.getRepository(City);
         this.countriesRepository = AppDataSource.getRepository(Country);
+        this.messageHandler = new MessageHandler(parserService, openaiService, httpService, bot);
     }
 
     async handle(context, chatId) {
@@ -78,7 +89,15 @@ export default class EditOperation {
                 request = await this.requestsRepository.findOneBy({ guid: output.guid });
                 if (request) {
                     request.hasReward = hasReward;
-                    await this.requestsRepository.save({ ...request });
+                    const updatedRequest: any = await this.requestsRepository.save({ ...request });
+                    if (updatedRequest) {
+                        this.bot.sendMessage(
+                            chatId,
+                            locales.ru.updateRequestMessage
+                        ).then(() => {
+                            this.messageHandler.sendConfirmation(chatId, request);
+                        });
+                    }
                 }
                 // get request
                 break;
@@ -99,7 +118,15 @@ export default class EditOperation {
                     request = await this.requestsRepository.findOneBy({ guid: output.guid });
                     if (request) {
                         request.from = [output.from.name];
-                        await this.requestsRepository.save({ ...request });
+                        const updatedRequest: any = await this.requestsRepository.save({ ...request });
+                        if (updatedRequest) {
+                            this.bot.sendMessage(
+                                chatId,
+                                locales.ru.updateRequestMessage
+                            ).then(() => {
+                                this.messageHandler.sendConfirmation(chatId, request);
+                            });
+                        }
                     }
                 }
                 // get request
@@ -121,10 +148,17 @@ export default class EditOperation {
                     request = await this.requestsRepository.findOneBy({ guid: output.guid });
                     if (request) {
                         request.to = [output.to.name];
-                        await this.requestsRepository.save({ ...request });
+                        const updatedRequest: any = await this.requestsRepository.save({ ...request });
+                        if (updatedRequest) {
+                            this.bot.sendMessage(
+                                chatId,
+                                locales.ru.updateRequestMessage
+                            ).then(() => {
+                                this.messageHandler.sendConfirmation(chatId, request);
+                            });
+                        }
                     }
                 }
-                // get request
                 break;
         }
     }

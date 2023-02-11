@@ -104,7 +104,15 @@ export default class MessageHandler {
                             const request: any = await this.requestsRepository.findOneBy({ guid: actionDetails.guid });
                             if (request) {
                                 request[actionDetails.column] = actionDetails.value;
-                                await this.requestsRepository.save({ ...request });
+                                const updatedRequest = await this.requestsRepository.save({ ...request });
+                                if (updatedRequest) {
+                                    this.bot.sendMessage(
+                                        chatId,
+                                        locales.ru.updateRequestMessage
+                                    ).then(() => {
+                                        this.sendConfirmation(chatId, request);
+                                    });
+                                }
                             }
                         }
                     }
@@ -114,6 +122,23 @@ export default class MessageHandler {
             console.error(exception.message);
             console.error('Context: ', message);
         }
+    }
+
+    async sendConfirmation(chatId: number, request) {
+        const message = this.messageCreator.createRequestMessage(request);
+        const options: any = {
+            reply_markup: {
+                inline_keyboard: [
+                    [{text: locales.ru.edit, callback_data: `edit ${request.guid}`}],
+                    [{text: locales.ru.ok, callback_data: `start`}]
+                ]
+            }
+        }
+        await this.bot.sendMessage(
+            chatId,
+            message,
+            options
+        );
     }
 
     async getRequests(userId: number) {
