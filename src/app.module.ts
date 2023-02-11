@@ -7,7 +7,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import entities from './config/typeorm/entities';
 import { ParserService } from './providers/parser/parser.service';
 import { RequestsModule } from './requests/requests.module';
-import {LocationsModule} from "./locations/locations.module";
+import { LocationsModule } from "./locations/locations.module";
 
 @Module({
   imports: [
