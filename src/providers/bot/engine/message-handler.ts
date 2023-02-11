@@ -7,7 +7,7 @@ import CreateMessage from "./operations/create-message";
 
 const START_COMMAND: string = '/start';
 
-import {getChat, getActionDetails} from "./operations/chat-extend";
+import {getChat, getActionDetails, updateChat} from "./operations/chat-extend";
 import {AppDataSource} from "../../../app-data-source";
 import {Chat} from "../../../chats/entities/chat.entity";
 import {City} from "../../../cities/entities/city.entity";
@@ -110,7 +110,10 @@ export default class MessageHandler {
                                         chatId,
                                         locales.ru.updateRequestMessage
                                     ).then(() => {
-                                        this.sendConfirmation(chatId, request);
+                                        this.sendConfirmation(chatId, request)
+                                            .then(() => {
+                                                updateChat(this, chatId, null);
+                                            });
                                     });
                                 }
                             }

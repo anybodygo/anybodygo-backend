@@ -20,7 +20,7 @@ const EDIT_FROM_NO_COMMAND: string = 'edit-from:no';
 const EDIT_TO_YES_COMMAND: string = 'edit-to:yes';
 const EDIT_TO_NO_COMMAND: string = 'edit-to:no';
 
-import {getCity, getCountry, handleAction} from "./chat-extend";
+import {getCity, getCountry, handleAction, updateChat} from "./chat-extend";
 import MessageHandler from "../message-handler";
 import {ParserService} from "../../../parser/parser.service";
 import {OpenaiService} from "../../../openai/openai.service";
@@ -98,7 +98,9 @@ export default class EditOperation {
                             chatId,
                             locales.ru.updateRequestMessage
                         ).then(() => {
-                            this.messageHandler.sendConfirmation(chatId, request);
+                            this.messageHandler.sendConfirmation(chatId, request).then(() => {
+                                updateChat(this, chatId, null);
+                            });
                         });
                     }
                 }
@@ -171,7 +173,10 @@ export default class EditOperation {
                     chatId,
                     locales.ru.updateRequestMessage
                 ).then(() => {
-                    this.messageHandler.sendConfirmation(chatId, updatedRequest);
+                    this.messageHandler.sendConfirmation(chatId, updatedRequest)
+                        .then(() => {
+                            updateChat(this, chatId, null);
+                        });
                 });
             }
         } else {
@@ -179,7 +184,10 @@ export default class EditOperation {
                 chatId,
                 locales.ru.updateRequestMessage
             ).then(() => {
-                this.messageHandler.sendConfirmation(chatId, updatedRequest);
+                this.messageHandler.sendConfirmation(chatId, updatedRequest)
+                    .then(() => {
+                        updateChat(this, chatId, null);
+                    });
             });
         }
     }
