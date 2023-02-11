@@ -72,7 +72,7 @@ export default class MessageHandler {
                     } else if (actionDetails && actionDetails.exception) {
                         await this.bot.sendMessage(chatId, actionDetails.message);
                     } else {
-                        if (['to', 'from'].includes(actionDetails.column)) {
+                        if (['to', 'from'].includes(actionDetails.column) && actionDetails.value) {
                             const locationContext: string = actionDetails.value.country ?
                                 `country:${actionDetails.value.country.id}` :
                                 `city:${actionDetails.value.city.id}`;
@@ -86,7 +86,7 @@ export default class MessageHandler {
                                             },
                                             {
                                                 text: locales.ru.no,
-                                                callback_data: `edit-${actionDetails.column}:no ${actionDetails.guid}:${locationContext}`
+                                                callback_data: `edit-${actionDetails.column}:no ${actionDetails.guid}`
                                             }
                                         ]
                                     ]
